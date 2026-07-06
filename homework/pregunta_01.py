@@ -3,10 +3,14 @@
 Escriba el codigo que ejecute la accion solicitada.
 """
 
+import os
+import matplotlib.pyplot as plt
+import pandas as pd
+
 
 def pregunta_01():
     """
-    El archivo `data/shipping-data.csv` contiene información sobre los envios
+    El archivo `files/input/shipping-data.csv` contiene información sobre los envios
     de productos de una empresa. Cree un dashboard estático en HTML que
     permita visualizar los siguientes campos:
 
@@ -18,27 +22,34 @@ def pregunta_01():
     Todos los archivos debe ser creados en la carpeta `docs`.
     Su código debe crear la carpeta `docs` si no existe.
     """
-    import os
-    import matplotlib.pyplot as plt
-    import pandas as pd
+    # 1. BUSCAR EL ARCHIVO EN LAS RUTAS POSIBLES (Priorizando files/input/)
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-    # DETERMINAR RUTAS (A prueba de fallos para local y GitHub Classroom)
-    # Si existe 'data/shipping-data.csv' en el directorio actual, lo usa; si no, busca desde la raíz del script.
-    if os.path.exists("data/shipping-data.csv"):
-        data_path = "data/shipping-data.csv"
-        docs_dir = "docs"
-    else:
-        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        data_path = os.path.join(base_dir, "data", "shipping-data.csv")
-        docs_dir = os.path.join(base_dir, "docs")
+    rutas_posibles = [
+        os.path.join("files", "input", "shipping-data.csv"),
+        os.path.join(base_dir, "files", "input", "shipping-data.csv"),
+        os.path.join("data", "shipping-data.csv"),
+        os.path.join(base_dir, "data", "shipping-data.csv"),
+        "shipping-data.csv",
+    ]
 
-    # 1. Crear la carpeta 'docs' si no existe
-    os.makedirs(docs_dir, exist_ok=True)
+    data_path = None
+    for ruta in rutas_posibles:
+        if os.path.exists(ruta):
+            data_path = ruta
+            break
 
-    # 2. Leer los datos del CSV
+    if data_path is None:
+        raise FileNotFoundError(
+            f"[ERROR] No se pudo encontrar 'shipping-data.csv'. "
+            f"Asegúrate de que exista en la carpeta del proyecto."
+        )
+
+    # 2. LEER LOS DATOS Y CREAR LA CARPETA 'docs'
     df = pd.read_csv(data_path)
+    os.makedirs("docs", exist_ok=True)
 
-    # ---- GRÁFICO 1: Shipping per Warehouse Block ----
+    # ---- GRÁFICO 1: shipping_per_warehouse.png ----
     plt.figure(figsize=(6, 4))
     counts_warehouse = df["Warehouse_block"].value_counts().sort_index()
     counts_warehouse.plot(kind="bar", color="tab:blue", alpha=0.8)
@@ -48,10 +59,10 @@ def pregunta_01():
     plt.gca().spines["top"].set_visible(False)
     plt.gca().spines["right"].set_visible(False)
     plt.grid(axis="y", linestyle="--", alpha=0.5)
-    plt.savefig(os.path.join(docs_dir, "shipping_per_warehouse.png"), bbox_inches="tight")
+    plt.savefig("docs/shipping_per_warehouse.png", bbox_inches="tight")
     plt.close()
 
-    # ---- GRÁFICO 2: Mode of Shipment ----
+    # ---- GRÁFICO 2: mode_of_shipment.png ----
     plt.figure(figsize=(6, 4))
     counts_mode = df["Mode_of_Shipment"].value_counts()
     counts_mode.plot(
@@ -61,11 +72,11 @@ def pregunta_01():
         startangle=90,
     )
     plt.title("Mode of Shipment", fontsize=12, fontweight="bold")
-    plt.ylabel("")  
-    plt.savefig(os.path.join(docs_dir, "mode_of_shipment.png"), bbox_inches="tight")
+    plt.ylabel("")
+    plt.savefig("docs/mode_of_shipment.png", bbox_inches="tight")
     plt.close()
 
-    # ---- GRÁFICO 3: Average Customer Rating ----
+    # ---- GRÁFICO 3: average_customer_rating.png ----
     plt.figure(figsize=(6, 4))
     avg_rating = df.groupby("Warehouse_block")["Customer_rating"].mean()
     avg_rating.plot(kind="bar", color="tab:orange", alpha=0.8)
@@ -76,10 +87,10 @@ def pregunta_01():
     plt.gca().spines["top"].set_visible(False)
     plt.gca().spines["right"].set_visible(False)
     plt.grid(axis="y", linestyle="--", alpha=0.5)
-    plt.savefig(os.path.join(docs_dir, "average_customer_rating.png"), bbox_inches="tight")
+    plt.savefig("docs/average_customer_rating.png", bbox_inches="tight")
     plt.close()
 
-    # ---- GRÁFICO 4: Weight Distribution ----
+    # ---- GRÁFICO 4: weight_distribution.png ----
     plt.figure(figsize=(6, 4))
     df["Weight_in_gms"].plot(
         kind="hist", bins=20, color="tab:purple", edgecolor="white", alpha=0.8
@@ -90,10 +101,10 @@ def pregunta_01():
     plt.gca().spines["top"].set_visible(False)
     plt.gca().spines["right"].set_visible(False)
     plt.grid(axis="y", linestyle="--", alpha=0.5)
-    plt.savefig(os.path.join(docs_dir, "weight_distribution.png"), bbox_inches="tight")
+    plt.savefig("docs/weight_distribution.png", bbox_inches="tight")
     plt.close()
 
-    # ---- 3. CREAR EL ARCHIVO HTML (Dashboard) ----
+    # ---- 3. GENERAR EL ARCHIVO HTML (index.html) ----
     html_content = """<!DOCTYPE html>
 <html>
 <head>
@@ -157,7 +168,7 @@ def pregunta_01():
 </html>
 """
 
-    with open(os.path.join(docs_dir, "index.html"), "w", encoding="utf-8") as f:
+    with open("docs/index.html", "w", encoding="utf-8") as f:
         f.write(html_content)
 
 
