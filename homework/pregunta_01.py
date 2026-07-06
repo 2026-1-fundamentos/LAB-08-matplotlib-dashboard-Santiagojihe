@@ -15,9 +15,6 @@ def pregunta_01():
     * `Customer_rating`
     * `Weight_in_gms`
 
-    El dashboard generado debe ser similar a este:
-    https://github.com/jdvelasq/LAB_matplotlib_dashboard/blob/main/shipping-dashboard-example.png
-
     Todos los archivos debe ser creados en la carpeta `docs`.
     Su código debe crear la carpeta `docs` si no existe.
     """
@@ -25,11 +22,17 @@ def pregunta_01():
     import matplotlib.pyplot as plt
     import pandas as pd
 
-    # 1. Crear la carpeta 'docs' si no existe obligatoriamente
-    os.makedirs("docs", exist_ok=True)
+    # ENCONTRAR LA RAÍZ DEL REPOSITORIO AUTOMÁTICAMENTE
+    # __file__ es 'homework/pregunta_01.py'. Su padre es 'homework' y el padre de su padre es la raíz del repo.
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    data_path = os.path.join(base_dir, "data", "shipping-data.csv")
+    docs_dir = os.path.join(base_dir, "docs")
 
-    # 2. Leer los datos desde la carpeta especificada
-    df = pd.read_csv("data/shipping-data.csv")
+    # 1. Crear la carpeta 'docs' en la raíz si no existe
+    os.makedirs(docs_dir, exist_ok=True)
+
+    # 2. Leer los datos desde la ruta absoluta calculada
+    df = pd.read_csv(data_path)
 
     # ---- GRÁFICO 1: Shipping per Warehouse Block ----
     plt.figure(figsize=(6, 4))
@@ -41,7 +44,7 @@ def pregunta_01():
     plt.gca().spines["top"].set_visible(False)
     plt.gca().spines["right"].set_visible(False)
     plt.grid(axis="y", linestyle="--", alpha=0.5)
-    plt.savefig("docs/shipping_per_warehouse.png", bbox_inches="tight")
+    plt.savefig(os.path.join(docs_dir, "shipping_per_warehouse.png"), bbox_inches="tight")
     plt.close()
 
     # ---- GRÁFICO 2: Mode of Shipment ----
@@ -54,8 +57,8 @@ def pregunta_01():
         startangle=90,
     )
     plt.title("Mode of Shipment", fontsize=12, fontweight="bold")
-    plt.ylabel("")  # Remover etiqueta vertical sobrante de pandas
-    plt.savefig("docs/mode_of_shipment.png", bbox_inches="tight")
+    plt.ylabel("")  
+    plt.savefig(os.path.join(docs_dir, "mode_of_shipment.png"), bbox_inches="tight")
     plt.close()
 
     # ---- GRÁFICO 3: Average Customer Rating ----
@@ -69,7 +72,7 @@ def pregunta_01():
     plt.gca().spines["top"].set_visible(False)
     plt.gca().spines["right"].set_visible(False)
     plt.grid(axis="y", linestyle="--", alpha=0.5)
-    plt.savefig("docs/average_customer_rating.png", bbox_inches="tight")
+    plt.savefig(os.path.join(docs_dir, "average_customer_rating.png"), bbox_inches="tight")
     plt.close()
 
     # ---- GRÁFICO 4: Weight Distribution ----
@@ -83,76 +86,3 @@ def pregunta_01():
     plt.gca().spines["top"].set_visible(False)
     plt.gca().spines["right"].set_visible(False)
     plt.grid(axis="y", linestyle="--", alpha=0.5)
-    plt.savefig("docs/weight_distribution.png", bbox_inches="tight")
-    plt.close()
-
-    # ---- 3. CREAR EL ARCHIVO HTML (Dashboard) ----
-    html_content = """<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>Shipping Dashboard</title>
-    <style>
-        body {
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-            background-color: #f8f9fa;
-            margin: 0;
-            padding: 20px;
-            color: #333;
-        }
-        h1 {
-            text-align: center;
-            margin-bottom: 30px;
-            color: #222;
-        }
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
-            gap: 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        .card {
-            background: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            padding: 15px;
-            text-align: center;
-            border: 1px solid #e9ecef;
-        }
-        img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 4px;
-        }
-    </style>
-</head>
-<body>
-
-    <h1>Shipping Data Dashboard</h1>
-    
-    <div class="dashboard-grid">
-        <div class="card">
-            <img src="shipping_per_warehouse.png" alt="Shipping per Warehouse Block">
-        </div>
-        <div class="card">
-            <img src="mode_of_shipment.png" alt="Mode of Shipment">
-        </div>
-        <div class="card">
-            <img src="average_customer_rating.png" alt="Average Customer Rating">
-        </div>
-        <div class="card">
-            <img src="weight_distribution.png" alt="Weight Distribution">
-        </div>
-    </div>
-
-</body>
-</html>
-"""
-
-    with open("docs/index.html", "w", encoding="utf-8") as f:
-        f.write(html_content)
-
-
-if __name__ == "__main__":
-    pregunta_01()
